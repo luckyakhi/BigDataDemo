@@ -21,7 +21,7 @@ public class MaxTemperatureJob extends Configured implements Tool{
 	@Override
 	public int run(String[] args) throws Exception {
 		Job maxTemperatureJob = new Job(getConf());
-		maxTemperatureJob.setJarByClass(Job.class);
+		maxTemperatureJob.setJarByClass(MaxTemperatureJob.class);
 		maxTemperatureJob.setInputFormatClass(TextInputFormat.class);
 		maxTemperatureJob.setMapOutputKeyClass(Text.class);
 		maxTemperatureJob.setMapOutputValueClass(LongWritable.class);
