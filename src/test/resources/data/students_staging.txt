@@ -1,0 +1,4 @@
+alan,1,boston_law_school,US
+baldwin,2,departed_school_of_drama,US
+hugh,3,x_men_school,UK
+monish,4,coupling_college,UK

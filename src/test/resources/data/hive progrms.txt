@@ -1,0 +1,480 @@
+CREATE DATABASE retail_db;
+CREATE DATABASE IF NOT EXISTS retail_db;
+
+
+
+Create all retail_db tables in hive:
+
+USE retail_db;
+DROP TABLE categories;
+CREATE TABLE categories (
+category_id int,
+category_department_id int,
+category_name string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+
+
+CREATE TABLE customers (
+customer_id       int,
+customer_fname    string,
+customer_lname    string,
+customer_email    string,
+customer_password string,
+customer_street   string,
+customer_city     string,
+customer_state    string,
+customer_zipcode  string 
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+CREATE TABLE departments (
+department_id int,
+department_name string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+CREATE TABLE orders (
+order_id int,
+order_date string,
+order_customer_id int,
+order_status string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+CREATE TABLE order_items (
+order_item_id int,
+order_item_order_id int,
+order_item_order_date string,
+order_item_product_id int,
+order_item_quantity smallint,
+order_item_subtotal float,
+order_item_product_price float
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+CREATE TABLE products (
+product_id int, 
+product_category_id int,
+product_name string,
+product_description string,
+product_price float,
+product_image string
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+
+
+
+
+NASDAQ,JDAS,2010-01-29,26.91,27.53,26.02,26.21,883100,26.21
+
+create table stock_hive (exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) row format delimited fields terminated by ',' stored as textfile;
+
+load data local inpath '/home/user/work/input/StockData' into table stock_hive;
+
+
+selet open as open, close as close from stock_hive where high >10; 
+
+create external table stock_hive_exteranal (exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) row format delimited fields terminated by ',' stored as textfile location '/hdfs/input/StockData/';
+
+CREATE TABLE students_bucket(name STRING,id INT,college STRING) PARTITIONED BY(country STRING) CLUSTERED BY (college) INTO 4 BUCKETS ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' ;
+
+veera	101	gsdc
+ravi	102	vrc
+raj	103	vrc
+nayan	104	gkg
+satish	105	bgr
+mahee	106	gsdc
+
+
+load data inpath '/input/worldCountInput.txt' overwrite into table wordcount; 
+ SELECT word, COUNT(*) FROM doc LATERAL VIEW explode(split(text, ' ')) lTable as word GROUP BY word; 
+SELECT word, COUNT(*) FROM wordcount LATERAL VIEW explode(split(text, ' ')) lTable as word GROUP BY word; 
+
+
+create table repeated_word1(word string) row format delimited fields terminated by '\t' stored as textfile;
+
+load data local inpath '/home/user/work/input/studentdata.txt' into table repeated_word;
+
+select word, count(word) from repeated_word group by word;
+
+
+********************************************************
+	Find Value length of column in <K,V>
+********************************************************
+add jar /home/user/Desktop/EXAMPLEJARS/hivejars/valueLength.jar;
+create temporary function getColumnValue as 'com.hive.customudfs.ColunValueLength';
+create table findlength(key int,value string)row format delimited fields terminated by ',' stored as textfile;
+load data local inpath '/home/user/work/input/hiveinput/simpletext.txt' into table findlength;
+
+select key,getColumnValue(value) from findlength;
+
+*********************************************************
+		insert stmt IT WILL WORK IN HIVE 0.14
+*********************************************************
+CREATE TABLE students (name VARCHAR(64), age INT, gpa DECIMAL(3, 2)) 
+  ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' STORED AS TEXTFILE;
+
+  
+INSERT INTO TABLE students VALUES ('fred flintstone', 35, 1.28), ('barney rubble', 32, 2.32),('barney rubble', 32, 2.32);   
+  
+  
+CREATE TABLE pageviews (userid VARCHAR(64), link STRING, from STRING) 
+  PARTITIONED BY (datestamp STRING) CLUSTERED BY (userid) INTO 256 BUCKETS STORED AS ORC; 
+  
+  
+INSERT INTO TABLE pageviews PARTITION (datestamp = '2014-09-23') 
+  VALUES ('jsmith', 'mail.com', 'sports.com'), ('jdoe', 'mail.com', null); 
+  
+  
+INSERT INTO TABLE pageviews PARTITION (datestamp) 
+  VALUES ('tjohnson', 'sports.com', 'finance.com', '2014-09-23'), ('tlee', 'finance.com', null, '2014-09-21'); 
+
+
+*********************************************************
+		EXTERNAL TABLES
+*********************************************************
+CREATE EXTERNAL TABLE IF NOT EXISTS STUDENT_EXTERNAL1 (NAME STRING,ID DOUBLE,COLLEGE_NAME STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\n' STORED AS TEXTFILE LOCATION '/input/hive_extrn_veera';
+
+select * from student_external;
+
+create external table external_test3 (exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) row format delimited fields terminated by ',' stored as textfile location '/input/StockData.txt';
+
+--/input/StockData.txt/StockData.txt -- 
+
+*********************************************************
+		External Tables without location
+*********************************************************
+if we did not specify the location, the table will get create under /user/hive/warehouse/ and it will treat as manage table. but when we drop it, it will delete the only table and schema not the data in hdfs.
+
+create external table external_test2 (exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) row format delimited fields terminated by ',' stored as textfile;
+
+load data local inpath '/home/user/work/input/StockData.txt' into table external_test2;
+
+-- load data which is there in HDFS.
+
+when we load data from hdfs to hive table, it will move from hdfs to hive warehouse.
+
+load data inpath '/hdfs/input/StockData/stock.txt' into table exteranal2;
+
+
+
+create table external_test2 (exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) row format delimited fields terminated by ',' stored as textfile;
+
+==============================================================
+		same data with multiple schema
+==============================================================
+create external table external_mult_schema1 (exchnge string,symbol string,date string,open double,adj_close double) row format delimited fields terminated by ',' stored as textfile location '/input/StockData.txt';
+
+create external table external_mult_schema2 (exchnge string,symbol string,date string,low double,close double,volume bigint,adj_close double) row format delimited fields terminated by ',' stored as textfile location '/input/StockData.txt';
+
+*********************************************************
+		Managed Tables partition
+*********************************************************
+
+create table empTest(name string, address string, doj bigint, proffision string, dob bigint,country string, state
+string, city string)ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+
+LOAD DATA LOCAL INPATH '/home/user/work/input/hiveinput/uidpartition.txt' into table emptest;
+
+CREATE TABLE IF NOT EXISTS STOCK_PARTITION(exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) PARTITIONED BY (country string, State STRING, city string ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+==========================================================================================
+1) input file for BA.txt (country=india,state=ka,city=ban)
+2) HYD.txt (country=india,state=ts,city=hyd)
+3)MUM.txt (country=india,state=mh,city=mum) 
+
+/input/emp/statewise/
+
+=============================================================================================
+CREATE TABLE IF NOT EXISTS emp_partition(id string, name string, sal double, dept string, doj string) PARTITIONED BY (country string, State STRING, city string ) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+
+load data local inpath='/input/emp/statewise/BA.txt' partition (country=india,state=ka,city=ban) into table emp_partition;
+
+load data local inpath='/input/emp/statewise/HYD.txt' partition (country=india,state=ts,city=hyd) into table emp_partition;
+
+load data local inpath='/input/emp/statewise/MUM.txt' partition (country=india,state=mh,city=mum) into table emp_partition;
+
+load data local inpath='/input/emp/statewise/mysore.txt' partition (country=india,state=ka,city=mys) into table emp_partition;
+=============================================================================================================
+limitation 1) you should have large no of small files
+ solution 1: we will create temptable without partition, and load whole data into temptable
+             create partition table
+             insert into partition table by selecting temp table where country=india state=ka
+             insert into partition table by selecting temp table where country=india state=AP
+             insert into partition table by selecting temp table where country=india state=MH
+================================================================================================
+
+
+CREATE TABLE IF NOT EXISTS STOCK_PARTITION(exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) PARTITIONED BY (DT STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+
+CREATE TABLE IF NOT EXISTS STOCK_STAGE(exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+
+LOAD DATA LOCAL INPATH '/home/user/work/input/StockData.txt' into table STOCK_STAGE;
+
+
+===================================dynamic partition==================================
+
+set hive.exec.dynamic.partition = true
+
+
+CREATE TABLE IF NOT EXISTS STOCK_PARTITION(exchnge string,symbol string,date string,open double,high double,low double,close double,volume bigint,adj_close double) PARTITIONED BY (DT STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' STORED AS TEXTFILE;
+
+
+INSERT OVERWRITE TABLE STOCK_PARTITION PARTITION (DT) 
+      SELECT exchnge,symbol,date,open,high,low,close,volume,adj_close, SS.date as DT FROM STOCK_STAGE SS WHERE date is not null;
+
+
+*********************************************************
+		Employee Max salary by dept
+*********************************************************
+
+CREATE TABLE IF NOT EXISTS EMP_SAL(id int, name String, dob String, salary Double, department String, address string) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
+
+LOAD DATA LOCAL INPATH '/home/user/work/input/hiveinput/employeedata.txt' into table EMP_SAL;
+
+SELECT DEPARTMENT,MAX(SALARY) FROM EMP_SAL GROUP BY DEPARTMENT;
+
+
+WITH cteRowNum AS (
+    SELECT id, name, dob,salary,department,address
+           DENSE_RANK() OVER(PARTITION BY DeptID ORDER BY Salary DESC) AS RowNum
+        FROM emp_sal
+)
+SELECT id, name, dob,salary,department,address
+    FROM cteRowNum
+    WHERE RowNum = 1;
+********************************************************
+		Replace characters
+********************************************************
+select regexp_replace(start_date, '-', '') from test;
+
+or
+
+SET REGEX="(\\d{2})-(\\d{2})-(\\d{4})";
+SELECT
+  CONCAT(
+    regexp_extract(dob, ${hiveconf:REGEX}, 1),
+    regexp_extract(dob, ${hiveconf:REGEX}, 2),
+    regexp_extract(dob, ${hiveconf:REGEX}, 3)
+  )
+FROM emp_sal;
+
+
+*******************************************************
+		Parameter
+*******************************************************
+
+1) When doing shell scripts, executing lines have to be wrapped with `. so i did
+
+temp.sh
+    temp=`date --date='yesterday' +%y%m%d`
+    hive -f testing.hql -hiveconf var=$temp
+
+and it works like a charm
+
+2) in the query, the parameter must be in double quotes.
+hive.hdl
+
+    select jobid from temp_table where dt >= "${hiveconf:var}"; 
+
+Hope this question can help others who had this issue.
+
+
+
+
+*****************************************************************
+		RESULT TO CSV file
+*****************************************************************
+
+hive -e "select a.key as selectedKey,a.value as selectedValue from sample1 as a JOIN sample3 as b ON a.key = b.key where a.key >=200" > /home/user/work/veerahive.tsv
+
+
+
+********************************************************************
+		MultiTale insert
+********************************************************************
+
+create table employeetest(id int,name string,sal double,deptid string,deptname string,location string,country string,deduction double,pf double) row format delimited fields terminated by '\t' stored as textfile;
+
+LOAD DATA LOCAL INPATH '/home/user/work/input/hiveinput/employeewithdept.txt' into table employeetest;
+
+create table empdetails(id int,name string,sal double,deptid string) row format delimited fields terminated by '\t' stored as textfile;
+
+create table deptdetails(deptid string,deptname string,location string,country string) row format delimited fields terminated by '\t' stored as textfile;
+
+create table empdeductions1(id int,name string,deduction double,pf double) row format delimited fields terminated by '\t' stored as textfile;
+
+from employeetest insert overwrite table empdetails select id,name,sal,deptid insert overwrite table deptdetails select deptid,deptname,location,country insert overwrite table empdeductions1 select id,name,deduction,pf;
+
+select * from employeetest;
+
+select * from empdetails;
+select * from deptdetails;
+select * from empdeductions1;
+
+1013645312
+**************************************************************
+		JOIN
+**************************************************************
+select a.key as selectedKey,a.value as selectedValue from sample1 as a JOIN sample3 as b ON a.key = b.key where a.key >=100;
+
+create table empdetails(id int,name string,sal double,deptid string) row format delimited fields terminated by '\t' stored as textfile;
+
+create table deptdetails(deptid string,deptname string,location string,country string) row format delimited fields terminated by '\t' stored as textfile;
+
+select * from empdetails;
+
+
+101	ravi	10000.0	d101
+102	veera	13000.0	d101
+103	saurabh	10000.0	d102
+104	manju	10000.0	d101
+105	muni	70000.0	d103
+106	shruthi	20000.0	d102
+107	kumar	50000.0	d104
+Time taken: 1.671 seconds, Fetched: 7 row(s)
+
+hive> select * from deptdetails;
+OK
+d101	bigdata	bangalore	india
+d101	bigdata	bangalore	india
+d102	hadoop	delhi	india
+d101	bigdata	bangalore	india
+d103	JAVA/BIGDATA	bangalore	india
+d102	hadoop	bangalore	india
+d104	java	bangalore	india
+Time taken: 0.196 seconds, Fetched: 7 row(s)
+
+
+
+select a.id,a.name,b.deptname,b.country from empdetails a join deptdetails b on a.deptid = b.deptid;
+
+
+101	ravi	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+101	ravi	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+103	saurabh	hadoop	india
+106	shruthi	hadoop	india
+101	ravi	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+105	muni	JAVA/BIGDATA	india
+103	saurabh	hadoop	india
+106	shruthi	hadoop	india
+107	kumar	java	india
+
+
+emiId,empName,deptName,country
+
+===Left out Join
+
+select a.id,a.name,b.deptname,b.country from empdetails a left outer join deptdetails b on a.deptid = b.deptid;
+
+101	ravi	bigdata	india
+101	ravi	bigdata	india
+101	ravi	bigdata	india
+102	veera	bigdata	india
+102	veera	bigdata	india
+102	veera	bigdata	india
+103	saurabh	hadoop	india
+103	saurabh	hadoop	india
+104	manju	bigdata	india
+104	manju	bigdata	india
+104	manju	bigdata	india
+105	muni	JAVA/BIGDATA	india
+106	shruthi	hadoop	india
+106	shruthi	hadoop	india
+107	kumar	java	india
+Time taken: 38.104 seconds, Fetched: 15 row(s)
+
+====Right outer Join
+
+select a.id,a.name,b.deptname,b.country from empdetails a right outer join deptdetails b on a.deptid = b.deptid;
+
+
+101	ravi	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+101	ravi	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+103	saurabh	hadoop	india
+106	shruthi	hadoop	india
+101	ravi	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+105	muni	JAVA/BIGDATA	india
+103	saurabh	hadoop	india
+106	shruthi	hadoop	india
+107	kumar	java	india
+Time taken: 24.03 seconds, Fetched: 15 row(s)
+
+=============FULL outer Join
+
+select a.id,a.name,b.deptname,b.country from empdetails a full outer join deptdetails b on a.deptid = b.deptid;
+
+101	ravi	bigdata	india
+101	ravi	bigdata	india
+101	ravi	bigdata	india
+102	veera	bigdata	india
+102	veera	bigdata	india
+102	veera	bigdata	india
+104	manju	bigdata	india
+104	manju	bigdata	india
+104	manju	bigdata	india
+103	saurabh	hadoop	india
+103	saurabh	hadoop	india
+106	shruthi	hadoop	india
+106	shruthi	hadoop	india
+105	muni	JAVA/BIGDATA	india
+107	kumar	java	india
+Time taken: 32.598 seconds, Fetched: 15 row(s)
+
+
+
+create table empdeductions1(id int,name string,deduction double,pf double) row format delimited fields terminated by '\t' stored as textfile;
+
+
+
+
+********************************************************************
+		JOIN
+********************************************************************
+create table cust(id int,name string,pid string) row format delimited fields terminated by '\t' stored as textfile;
+
+create table prod(dpid string,pname string,pdcription string) row format delimited fields terminated by '\t' stored as textfile;
+
+LOAD DATA LOCAL INPATH '/home/user/work/input/hiveinput/custprodid.txt' into table cust;
+
+LOAD DATA LOCAL INPATH '/home/user/work/input/hiveinput/prodctdetails.txt' into table prod;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
