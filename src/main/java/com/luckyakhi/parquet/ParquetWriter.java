@@ -18,7 +18,7 @@ public class ParquetWriter {
 			Dataset<Record> userDataSet = Datasets.create(storeLocation, parquetDataSetDescriptor, Record.class);
 			DatasetWriter<Record> userDataSetWriter = userDataSet.newWriter();
 			GenericRecordBuilder userRecordBuilder = new GenericRecordBuilder(parquetDataSetDescriptor.getSchema());
-			Record record = userRecordBuilder.set("username","luckyaki").set("creationDate", System.currentTimeMillis()).set("favoriteColor", "RED").build();
+			Record record = userRecordBuilder.set("username","luckyakhi").set("creationDate", System.currentTimeMillis()).set("favoriteColor", "RED").build();
 			userDataSetWriter.write(record);
 			userDataSetWriter.close();
 		} catch (IOException e) {
