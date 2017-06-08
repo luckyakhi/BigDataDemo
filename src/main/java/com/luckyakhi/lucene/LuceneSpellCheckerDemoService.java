@@ -1,4 +1,4 @@
-package com.luckyakhi.autocomplete;
+package com.luckyakhi.lucene;
 import java.io.File;
 import java.io.IOException;
 
